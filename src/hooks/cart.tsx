@@ -42,18 +42,21 @@ const CartProvider: React.FC = ({ children }) => {
 
   const addToCart = useCallback(
     async (product: Product) => {
+      // eslint-disable-next-line no-underscore-dangle
+      let _products: Product[];
+
       const isProduct = products.find(p => p.id === product.id);
       if (isProduct) {
         const extractProducts = products.filter(p => p.id !== product.id);
-        setProducts([
+        _products = [
           ...extractProducts,
           { ...isProduct, quantity: isProduct.quantity + 1 },
-        ]);
+        ];
       } else {
-        setProducts([...products, product]);
+        _products = [...products, product];
       }
-      await AsyncStorage.removeItem('@Products');
-      await AsyncStorage.setItem('@Products', JSON.stringify(products));
+      await AsyncStorage.setItem('@Products', JSON.stringify(_products));
+      setProducts(_products);
     },
     [products],
   );
@@ -62,28 +65,36 @@ const CartProvider: React.FC = ({ children }) => {
     async id => {
       const product = products.filter(p => p.id === id)[0];
       const extractProducts = products.filter(p => p.id !== id);
-      setProducts([
+      // eslint-disable-next-line no-underscore-dangle
+      const _products = [
         ...extractProducts,
         { ...product, quantity: product.quantity + 1 },
-      ]);
-      await AsyncStorage.setItem('@Products', JSON.stringify(products));
+      ];
+      await AsyncStorage.setItem('@Products', JSON.stringify(_products));
+      setProducts(_products);
     },
     [products],
   );
 
   const decrement = useCallback(
     async id => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line no-underscore-dangle
+      let _products: Product[];
       const product = products.filter(p => p.id === id)[0];
       const extractProducts = products.filter(p => p.id !== id);
       if (product.quantity === 1) {
-        setProducts([...extractProducts]);
+        _products = [...extractProducts];
+        console.log('zero', _products);
       } else {
-        setProducts([
+        _products = [
           ...extractProducts,
           { ...product, quantity: product.quantity - 1 },
-        ]);
+        ];
+        console.log('no zero', _products);
       }
-      await AsyncStorage.setItem('@Products', JSON.stringify(products));
+      await AsyncStorage.setItem('@Products', JSON.stringify(_products));
+      setProducts(_products);
     },
     [products],
   );
