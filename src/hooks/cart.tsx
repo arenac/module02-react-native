@@ -40,7 +40,6 @@ const CartProvider: React.FC = ({ children }) => {
     async product => {
       const isProduct = products.find(p => p.id === product.id);
       if (isProduct) {
-        // eslint-disable-next-line prefer-const
         const extractProducts = products.filter(p => p.id !== product.id);
         setProducts([
           ...extractProducts,
