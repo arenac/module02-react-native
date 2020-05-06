@@ -42,56 +42,67 @@ const CartProvider: React.FC = ({ children }) => {
 
   const addToCart = useCallback(
     async (product: Omit<Product, 'quantity'>) => {
-      // eslint-disable-next-line no-underscore-dangle
-      let _products: Product[];
-
-      const isProduct = products.find(p => p.id === product.id);
-      if (isProduct) {
-        const extractProducts = products.filter(p => p.id !== product.id);
-        _products = [
-          ...extractProducts,
-          { ...isProduct, quantity: isProduct.quantity + 1 },
-        ];
+      const index = products.findIndex(prod => prod.id === product.id);
+      if (index !== -1) {
+        const newProducts = [...products];
+        newProducts[index] = {
+          ...newProducts[index],
+          quantity: newProducts[index].quantity + 1,
+        };
+        setProducts(newProducts);
+        AsyncStorage.setItem('@Products', JSON.stringify(newProducts));
       } else {
-        _products = [...products, { ...product, quantity: 1 }];
+        setProducts([...products, { ...product, quantity: 1 }]);
+        AsyncStorage.setItem(
+          '@Products',
+          JSON.stringify([...products, { ...product, quantity: 1 }]),
+        );
       }
-      await AsyncStorage.setItem('@Products', JSON.stringify(_products));
-      setProducts(_products);
     },
     [products],
   );
 
   const increment = useCallback(
     async id => {
-      const product = products.filter(p => p.id === id)[0];
-      const extractProducts = products.filter(p => p.id !== id);
-      // eslint-disable-next-line no-underscore-dangle
-      const _products = [
-        ...extractProducts,
-        { ...product, quantity: product.quantity + 1 },
-      ];
-      await AsyncStorage.setItem('@Products', JSON.stringify(_products));
-      setProducts(_products);
+      const index = products.findIndex(product => product.id === id);
+      if (index !== -1) {
+        const newProducts = [...products];
+        newProducts[index] = {
+          ...newProducts[index],
+          quantity: newProducts[index].quantity + 1,
+        };
+        setProducts(newProducts);
+        await AsyncStorage.setItem('@Products:', JSON.stringify(products));
+      } else {
+        await AsyncStorage.setItem('@Products:', JSON.stringify(products));
+      }
     },
     [products],
   );
 
   const decrement = useCallback(
     async id => {
-      // eslint-disable-next-line no-underscore-dangle
-      let _products: Product[];
-      const product = products.filter(p => p.id === id)[0];
-      const extractProducts = products.filter(p => p.id !== id);
-      if (product.quantity === 1) {
-        _products = [...extractProducts];
+      const index = products.findIndex(product => product.id === id);
+      if (index !== -1) {
+        const newProducts = [...products];
+        if (newProducts[index].quantity === 1) {
+          const deleteProduct = products.filter(product => product.id !== id);
+          setProducts(deleteProduct);
+          await AsyncStorage.setItem(
+            '@Products:',
+            JSON.stringify(deleteProduct),
+          );
+        } else {
+          newProducts[index] = {
+            ...newProducts[index],
+            quantity: newProducts[index].quantity - 1,
+          };
+          setProducts(newProducts);
+          await AsyncStorage.setItem('@Products:', JSON.stringify(newProducts));
+        }
       } else {
-        _products = [
-          ...extractProducts,
-          { ...product, quantity: product.quantity - 1 },
-        ];
+        await AsyncStorage.setItem('@Products:', JSON.stringify(products));
       }
-      await AsyncStorage.setItem('@Products', JSON.stringify(_products));
-      setProducts(_products);
     },
     [products],
   );
