@@ -41,7 +41,7 @@ const CartProvider: React.FC = ({ children }) => {
   }, []);
 
   const addToCart = useCallback(
-    async (product: Product) => {
+    async (product: Omit<Product, 'quantity'>) => {
       // eslint-disable-next-line no-underscore-dangle
       let _products: Product[];
 
@@ -53,7 +53,7 @@ const CartProvider: React.FC = ({ children }) => {
           { ...isProduct, quantity: isProduct.quantity + 1 },
         ];
       } else {
-        _products = [...products, product];
+        _products = [...products, { ...product, quantity: 1 }];
       }
       await AsyncStorage.setItem('@Products', JSON.stringify(_products));
       setProducts(_products);
@@ -78,20 +78,17 @@ const CartProvider: React.FC = ({ children }) => {
 
   const decrement = useCallback(
     async id => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       // eslint-disable-next-line no-underscore-dangle
       let _products: Product[];
       const product = products.filter(p => p.id === id)[0];
       const extractProducts = products.filter(p => p.id !== id);
       if (product.quantity === 1) {
         _products = [...extractProducts];
-        console.log('zero', _products);
       } else {
         _products = [
           ...extractProducts,
           { ...product, quantity: product.quantity - 1 },
         ];
-        console.log('no zero', _products);
       }
       await AsyncStorage.setItem('@Products', JSON.stringify(_products));
       setProducts(_products);
